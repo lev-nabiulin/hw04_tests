@@ -49,7 +49,7 @@ class PostURLTests(TestCase):
             with self.subTest(address=address):
                 response = self.guest_client.get(address)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
-        
+
         response = self.authorized_user.get('/create/')
         self.assertEqual(response.status_code, HTTPStatus.OK)
 

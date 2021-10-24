@@ -9,7 +9,6 @@ from .utils import paginator
 User = get_user_model()
 
 
-
 def index(request):
     posts = Post.objects.all()
     page_obj = paginator(request, posts)
