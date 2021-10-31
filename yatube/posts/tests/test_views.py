@@ -84,7 +84,6 @@ class PostViewTests(TestCase):
                 self.assertIn('posts', response.context)
                 self.assertEqual(len(response.context['posts']), object)
 
-
     def test_post_context(self):
 
         response = self.authorized_author.get(

@@ -8,6 +8,7 @@ from ..models import Group, Post
 
 User = get_user_model()
 
+
 class PostFormFormTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -35,7 +36,7 @@ class PostFormFormTests(TestCase):
     def setUp(self):
         self.authorized_user = Client()
         self.authorized_user.force_login(self.user)
-        
+
     def test_create_post(self):
         """Валидная форма создает запись в Post."""
         posts_count = Post.objects.count()
@@ -80,7 +81,6 @@ class PostFormFormTests(TestCase):
             group=self.group,
         )
         self.assertTrue(post_edit.exists())
-       
 
     def test_guest_cant_create_post(self):
         posts_count = Post.objects.count()
@@ -114,7 +114,8 @@ class PostFormFormTests(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertRedirects(
             response,
-            reverse('users:login') + '?next=' + reverse('posts:post_edit', args={self.post.pk})
+            reverse('users:login') + '?next='
+            + reverse('posts:post_edit', args={self.post.pk})
         )
         self.assertFalse(
             Post.objects.filter(
