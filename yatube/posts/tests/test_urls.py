@@ -27,8 +27,6 @@ class PostURLTests(TestCase):
         )
 
     def setUp(self):
-        # неавторизованный клиент
-        self.guest_client = Client()
         # авторизованный клиент автор
         self.authorized_author = Client()
         self.authorized_author.force_login(self.author)
@@ -47,7 +45,7 @@ class PostURLTests(TestCase):
         ]
         for address in open_urls_names:
             with self.subTest(address=address):
-                response = self.guest_client.get(address)
+                response = self.client.get(address)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
         response = self.authorized_user.get('/create/')
@@ -58,7 +56,7 @@ class PostURLTests(TestCase):
 
     def test_unexisting_page_404(self):
         """Несуществующая страница 404."""
-        response = self.guest_client.get('/unexisting_page/')
+        response = self.client.get('/unexisting_page/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_urls_redirect(self):
@@ -70,7 +68,7 @@ class PostURLTests(TestCase):
         ]
         for address in urls_names:
             with self.subTest(address=address):
-                response = self.guest_client.get(address, follow=True)
+                response = self.client.get(address, follow=True)
                 self.assertRedirects(
                     response, (
                         f'/auth/login/?next={address}'

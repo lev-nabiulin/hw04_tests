@@ -84,7 +84,14 @@ class PostViewTests(TestCase):
                 self.assertIn('posts', response.context)
                 self.assertEqual(len(response.context['posts']), object)
 
+
     def test_post_context(self):
+
+        response = self.authorized_author.get(
+            reverse('posts:post_detail', args={self.post.pk})
+        )
+        post = response.context['post']
+        self.assertEqual(post.pk, self.post.pk)
 
         urls = [
             reverse('posts:index'),
@@ -102,13 +109,13 @@ class PostViewTests(TestCase):
                 self.assertEqual(post_author_0, self.author.username)
                 self.assertEqual(post_group_0, self.group_1.title)
 
-    def test_post_id_context(self):
-
-        response = self.authorized_author.get(
-            reverse('posts:post_detail', args={self.post.pk})
-        )
-        post = response.context['post']
-        self.assertEqual(post.pk, self.post.pk)
+#    def test_post_id_context(self):
+#
+#        response = self.authorized_author.get(
+#            reverse('posts:post_detail', args={self.post.pk})
+#        )
+#        post = response.context['post']
+#        self.assertEqual(post.pk, self.post.pk)
 
     def test_group_context(self):
 
@@ -171,14 +178,30 @@ class PaginatorViewsTest(TestCase):
 
     def test_first_page_contains_ten_records(self):
 
-        for reverse_name in self.urls_with_paginator:
+        template = {
+            reverse('posts:index'): 10,
+            reverse('posts:group_list',
+                    kwargs={'slug': self.group.slug}): 10,
+            reverse('posts:profile',
+                    kwargs={'username': self.author.username}): 10,
+        }
+        for reverse_name, count in template.items():
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_author.get(reverse_name)
-                self.assertEqual(len(response.context['page_obj']), 10)
+                self.assertEqual(len(response.context['page_obj']), count)
 
     def test_second_page_contains_three_records(self):
 
-        for reverse_name in self.urls_with_paginator:
+        template = {
+            reverse('posts:index'): 3,
+            reverse('posts:group_list',
+                    kwargs={'slug': self.group.slug}): 3,
+            reverse('posts:profile',
+                    kwargs={'username': self.author.username}): 3,
+        }
+        for reverse_name, count in template.items():
             with self.subTest(reverse_name=reverse_name):
-                response = self.authorized_author.get(reverse_name + '?page=2')
-                self.assertEqual(len(response.context['page_obj']), 3)
+                response = self.authorized_author.get(
+                    reverse_name + '?page=2'
+                )
+                self.assertEqual(len(response.context['page_obj']), count)
