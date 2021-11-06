@@ -39,19 +39,19 @@ class PostViewTests(TestCase):
 
     def test_correct_template(self):
 
-       url_templates_names = {
+        url_templates_names = {
             reverse('posts:index'): 'posts/index.html',
             reverse('posts:profile', args={self.author.username}):
-                'posts/profile.html',
+            'posts/profile.html',
             reverse('posts:post_edit', args={self.post.pk}):
-                'posts/create_post.html',
+            'posts/create_post.html',
             reverse('posts:post_detail', args={self.post.pk}):
-                'posts/post_detail.html',
+            'posts/post_detail.html',
             reverse('posts:group_list', args={self.group.slug}):
-                'posts/group_list.html',
+            'posts/group_list.html',
             reverse('posts:post_create'): 'posts/create_post.html',
         }
-       for reverse_name, template in url_templates_names.items():
+        for reverse_name, template in url_templates_names.items():
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_author.get(reverse_name)
                 self.assertTemplateUsed(response, template)
@@ -94,13 +94,12 @@ class PostViewTests(TestCase):
                 self.assertEqual(post_group_title, self.group.title)
                 self.assertEqual(post_text, self.post.text)
                 self.assertEqual(post_author, self.author.username)
-                self.assertEqual(post_group, self.group.id)                
+                self.assertEqual(post_group, self.group.id)
                 """Проверка ID поста."""
                 response = self.authorized_author.get(
                     reverse('posts:post_detail', args={self.post.pk}))
                 post = response.context['post']
-                self.assertEqual(post.pk, self.post.pk) 
-
+                self.assertEqual(post.pk, self.post.pk)
 
     def test_group_context(self):
 
