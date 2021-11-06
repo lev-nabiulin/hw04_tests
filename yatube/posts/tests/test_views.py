@@ -1,3 +1,5 @@
+from types import CoroutineType
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -20,28 +22,16 @@ class PostViewTests(TestCase):
                 slug='first',
                 description='Тестовая группа',
             ),
-            Group.objects.create(
-                title='Тестовая группа',
-                slug='second',
-                description='Тестовая группа',
-            ),
         ]
-        cls.group_1 = cls.groups[0]
-        cls.group_2 = cls.groups[1]
+        cls.group = cls.groups[0]
         cls.posts = [
             Post.objects.create(
                 text='Тестовый пост',
                 author=cls.author,
-                group=cls.group_1,
-            ),
-            Post.objects.create(
-                text='Тестовый пост',
-                author=cls.author,
-                group=cls.group_2,
+                group=cls.group,
             ),
         ]
-        cls.post_in_group = cls.posts[0]
-        cls.post = cls.posts[1]
+        cls.post = cls.posts[0]
 
     def setUp(self):
         self.authorized_author = Client()
@@ -49,7 +39,7 @@ class PostViewTests(TestCase):
 
     def test_correct_template(self):
 
-        url_templates_names = {
+       url_templates_names = {
             reverse('posts:index'): 'posts/index.html',
             reverse('posts:profile', args={self.author.username}):
                 'posts/profile.html',
@@ -57,11 +47,11 @@ class PostViewTests(TestCase):
                 'posts/create_post.html',
             reverse('posts:post_detail', args={self.post.pk}):
                 'posts/post_detail.html',
-            reverse('posts:group_list', args={self.group_1.slug}):
+            reverse('posts:group_list', args={self.group.slug}):
                 'posts/group_list.html',
             reverse('posts:post_create'): 'posts/create_post.html',
         }
-        for reverse_name, template in url_templates_names.items():
+       for reverse_name, template in url_templates_names.items():
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_author.get(reverse_name)
                 self.assertTemplateUsed(response, template)
@@ -89,32 +79,36 @@ class PostViewTests(TestCase):
         urls = [
             reverse('posts:index'),
             reverse('posts:profile', args={self.author.username}),
-            reverse('posts:group_list', args={self.group_1.slug}),
+            reverse('posts:group_list', args={self.group.slug}),
         ]
         for reverse_name in urls:
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_author.get(reverse_name)
                 first_object = response.context['posts'][0]
-                post_text_0 = first_object.text
-                post_author_0 = first_object.author.username
-                post_group_0 = first_object.group.title
-                self.assertEqual(post_text_0, self.post_in_group.text)
-                self.assertEqual(post_author_0, self.author.username)
-                self.assertEqual(post_group_0, self.group_1.title)
+                post_text = first_object.text
+                post_author = first_object.author.username
+                post_group = first_object.group.id
+                post_user = first_object.author.id
+                post_group_title = first_object.group.title
+                self.assertEqual(post_user, self.author.id)
+                self.assertEqual(post_group_title, self.group.title)
+                self.assertEqual(post_text, self.post.text)
+                self.assertEqual(post_author, self.author.username)
+                self.assertEqual(post_group, self.group.id)                
                 """Проверка ID поста."""
                 response = self.authorized_author.get(
                     reverse('posts:post_detail', args={self.post.pk}))
                 post = response.context['post']
-                self.assertEqual(post.pk, self.post.pk)
+                self.assertEqual(post.pk, self.post.pk) 
+
 
     def test_group_context(self):
 
         response = self.authorized_author.get(
-            reverse('posts:group_list', args={self.group_1.slug})
+            reverse('posts:group_list', args={self.group.slug})
         )
         post = response.context['posts'][0]
-        self.assertEqual(post.pk, self.post_in_group.pk)
-        self.assertNotEqual(post.pk, self.post.pk)
+        self.assertEqual(post.pk, self.post.pk)
 
     def test_form_context(self):
 
@@ -169,7 +163,7 @@ class PaginatorViewsTest(TestCase):
     def test_first_page_contains_ten_records(self):
 
         response = self.authorized_author.get(reverse('posts:index'))
-        self.assertEqual(len(response.context['page_obj']), 10)
+        self.assertEqual(len(response.context['page_obj']), settings.PAGE_POST)
 
     def test_second_page_contains_three_records(self):
 

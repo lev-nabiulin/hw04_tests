@@ -75,7 +75,8 @@ class PostFormFormTests(TestCase):
         )
         self.assertEqual(Post.objects.count(), posts_count)
         self.post.refresh_from_db()
-        self.assertEqual(self.post.text, 'Текст поста после изменения')
+        self.assertEqual(self.post.text, self.post_after_edit['text'])
+        self.assertEqual(self.post.group.id, self.post_after_edit['group'])
 
     def test_guest_cant_create_post(self):
         posts_count = Post.objects.count()
@@ -113,4 +114,5 @@ class PostFormFormTests(TestCase):
             + reverse('posts:post_edit', args={self.post.pk})
         )
         self.post.refresh_from_db()
-        self.assertEqual(self.post.text, 'Тестовый пост')
+        self.assertNotEqual(self.post.text, self.post_after_edit['text'])
+        self.assertEqual(self.post.group.id, self.post_after_edit['group'])
