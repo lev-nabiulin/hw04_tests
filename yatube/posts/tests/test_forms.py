@@ -115,4 +115,3 @@ class PostFormFormTests(TestCase):
         )
         self.post.refresh_from_db()
         self.assertNotEqual(self.post.text, self.post_after_edit['text'])
-        self.assertEqual(self.post.group.id, self.post_after_edit['group'])
