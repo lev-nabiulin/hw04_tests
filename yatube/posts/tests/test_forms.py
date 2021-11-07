@@ -19,6 +19,11 @@ class PostFormFormTests(TestCase):
             slug='slug',
             description='Описание группы',
         )
+        cls.group_after_edit = Group.objects.create(
+            title='Тестовая группа edit',
+            slug='slug-edit',
+            description='Описание группы',
+        )
         cls.post = Post.objects.create(
             text='Тестовый пост',
             author=cls.user,
@@ -26,7 +31,7 @@ class PostFormFormTests(TestCase):
         )
         cls.post_after_edit = {
             'text': 'Текст поста после изменения',
-            'group': cls.group.id,
+            'group': cls.group_after_edit.id,
         }
         cls.post_guest_create = {
             'text': 'Текст поста',
@@ -115,3 +120,4 @@ class PostFormFormTests(TestCase):
         )
         self.post.refresh_from_db()
         self.assertNotEqual(self.post.text, self.post_after_edit['text'])
+        self.assertNotEqual(self.post.group, self.post_after_edit['group'])
